@@ -1,5 +1,5 @@
 {
-  "p4_src": "p4src/cm-sketch.p4",
+  "p4_src": "p4src/demo.p4",
   "cli": true,
   "pcap_dump": false,
   "enable_log": false,
@@ -15,7 +15,7 @@
     "switches": {
       "s1": {
         "cli_input": "s1-commands.txt",
-        "program": "p4src/cm-sketch.p4"
+        "program": "p4src/demo.p4"
       }
     }
   }

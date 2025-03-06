@@ -3,6 +3,8 @@ from p4utils.utils.helper import load_topo
 from p4utils.utils.sswitch_thrift_API import *
 from crc import Crc
 
+
+ARRAY_SIZE = 10
 crc32_polinomials = [0x04C11DB7, 0xEDB88320, 0xDB710641, 0x82608EDB, 0x741B8CD7, 0xEB31D82E,
                      0xD663B05, 0xBA0DC66B, 0x32583499, 0x992C1A4C, 0x32583499, 0x992C1A4C]
 
@@ -27,6 +29,28 @@ class CMSController(object):
         if self.set_hash:
             self.set_crc_custom_hashes()
         self.create_hashes()
+        
+        self.init_free_idx()
+
+        table_name = "suspicious_ip_table"
+        action_name = "store_suspicious_ip"
+
+        for i in range(ARRAY_SIZE):  # Assuming ARRAY_SIZE = 10
+            next_index = (i + 1) % ARRAY_SIZE
+            self.controller.table_add(table_name, action_name, ["1", str(i)], [str(next_index)])
+
+    def init_free_idx(self):
+        """Initialize the free_idx register to 0"""
+        register_name = "free_idx"
+        self.controller.register_write(register_name, 0, 0)  # Set free_idx[0] = 0
+        print(f"Initialized {register_name} to 0")
+
+    def get_free_index(self):
+        """Read the current free index from the register"""
+        register_name = "free_idx"
+        free_idx = self.controller.register_read(register_name, 0)
+        print(f"Current free index: {free_idx}")
+        return free_idx
 
     def set_forwarding(self):
         self.controller.table_add("forwarding", "set_egress_port", ['1'], ['2'])

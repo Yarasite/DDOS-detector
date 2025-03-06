@@ -8,9 +8,6 @@
 #define SKETCH_CELL_BIT_WIDTH 64
 #define ARRAY_SIZE 10
 #define THRESHOLD 100
-// 定义存储可疑 IP 对的数组
-register<bit<64>>(ARRAY_SIZE) suspicious_ip_pair;
-register<bit<32>>(1) free_idx;
 
 // 每个寄存器有 28 个单元，每个单元的宽度为 64 位
 #define SKETCH_REGISTER(num) register<bit<SKETCH_CELL_BIT_WIDTH>>(SKETCH_BUCKET_LENGTH) sketch##num
@@ -32,11 +29,11 @@ control MyIngress(inout headers hdr,
     SKETCH_REGISTER(0); 
     SKETCH_REGISTER(1);
     SKETCH_REGISTER(2);
-    //SKETCH_REGISTER(3);
-    //SKETCH_REGISTER(4);
 
-    free_idx.write(0, 0);
-
+    // 定义存储可疑 IP 对的数组
+	register<bit<64>>(ARRAY_SIZE) suspicious_ip_pair;
+    register<bit<32>>(1) free_idx;
+    
     action drop() {
         mark_to_drop(standard_metadata);
     }
@@ -46,8 +43,6 @@ control MyIngress(inout headers hdr,
         SKETCH_COUNT(0, crc32_custom);
         SKETCH_COUNT(1, crc32_custom);
         SKETCH_COUNT(2, crc32_custom);
-        //SKETCH_COUNT(3, crc32_custom);
-        //SKETCH_COUNT(4, crc32_custom);
     }
 
     action check() {
@@ -65,16 +60,21 @@ control MyIngress(inout headers hdr,
             min_value = meta.value_sketch2;
         }
 
-        // 检查最小值是否大于阈值
         if (min_value > THRESHOLD) {
-            bit<64> ip_pair = {hdr.ipv4.srcAddr, hdr.ipv4.dstAddr};
-            // 读取当前记录的第一个空闲位置
-            free_idx.read(current_free_idx, 0);
-            suspicious_ip_pair.write(current_free_idx, ip_pair);
-            // 更新 free_idx 到下一个位置
-            current_free_idx = (current_free_idx + 1) % ARRAY_SIZE;
-            free_idx.write(0, current_free_idx);
+            meta.exceed_threshold = 1;
+        } else {
+            meta.exceed_threshold = 0;
         }
+    }
+
+    action store_suspicious_ip(bit<32> next_idx) {
+        bit<64> ip_pair = (bit<64>) hdr.ipv4.srcAddr << 32 | (bit<64>) hdr.ipv4.dstAddr;
+
+        // Read current index and store suspicious I
+        suspicious_ip_pair.write(meta.current_free_idx, ip_pair);
+
+        // Use lookup table for next index update
+        free_idx.write(0, next_idx);
     }
 
     action set_egress_port(bit<9> egress_port){
@@ -94,12 +94,30 @@ control MyIngress(inout headers hdr,
         default_action = drop;
     }
 
+    table suspicious_ip_table {
+        key = {
+            meta.exceed_threshold: exact;  // Only apply when threshold exceeded
+            meta.current_free_idx: exact;  // Lookup next index for register update
+        }
+        actions = {
+            store_suspicious_ip;
+            NoAction;
+        }
+        size = ARRAY_SIZE;
+        default_action = NoAction;
+    }
+
     apply {
 
         //apply sketch
         if (hdr.ipv4.isValid() && hdr.tcp.isValid()){
             sketch_count();
-            check();
+            check();  // Determine if threshold is exceeded
+            
+            // Read current free index before applying table
+            free_idx.read(meta.current_free_idx, 0);
+            
+            suspicious_ip_table.apply();  // Store IP only if exceed_threshold is true
         }
 
         forwarding.apply();

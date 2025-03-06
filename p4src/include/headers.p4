@@ -69,6 +69,9 @@ struct metadata {
     bit<64> value_sketch5;
     bit<64> value_sketch6;
     bit<64> value_sketch7;
+
+    bit<1> exceed_threshold;  // for threshold check
+    bit<32> current_free_idx;
 }
 
 struct headers {
