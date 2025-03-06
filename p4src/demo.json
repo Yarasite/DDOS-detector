@@ -23,19 +23,9 @@
         ["metadata.index_sketch0", 32, false],
         ["metadata.index_sketch1", 32, false],
         ["metadata.index_sketch2", 32, false],
-        ["metadata.index_sketch3", 32, false],
-        ["metadata.index_sketch4", 32, false],
-        ["metadata.index_sketch5", 32, false],
-        ["metadata.index_sketch6", 32, false],
-        ["metadata.index_sketch7", 32, false],
         ["metadata.value_sketch0", 64, false],
         ["metadata.value_sketch1", 64, false],
         ["metadata.value_sketch2", 64, false],
-        ["metadata.value_sketch3", 64, false],
-        ["metadata.value_sketch4", 64, false],
-        ["metadata.value_sketch5", 64, false],
-        ["metadata.value_sketch6", 64, false],
-        ["metadata.value_sketch7", 64, false],
         ["metadata.exceed_threshold", 1, false],
         ["metadata.current_free_idx", 32, false],
         ["_padding_0", 7, false]
@@ -1119,107 +1109,8 @@
               "value" : ["scalars", "metadata.exceed_threshold"]
             },
             {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "?",
-                  "left" : {
-                    "type" : "hexstr",
-                    "value" : "0x01"
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0x00"
-                  },
-                  "cond" : {
-                    "type" : "expression",
-                    "value" : {
-                      "op" : ">",
-                      "left" : {
-                        "type" : "expression",
-                        "value" : {
-                          "op" : "?",
-                          "left" : {
-                            "type" : "field",
-                            "value" : ["scalars", "metadata.value_sketch2"]
-                          },
-                          "right" : {
-                            "type" : "expression",
-                            "value" : {
-                              "op" : "?",
-                              "left" : {
-                                "type" : "field",
-                                "value" : ["scalars", "metadata.value_sketch1"]
-                              },
-                              "right" : {
-                                "type" : "field",
-                                "value" : ["scalars", "metadata.value_sketch0"]
-                              },
-                              "cond" : {
-                                "type" : "expression",
-                                "value" : {
-                                  "op" : "<",
-                                  "left" : {
-                                    "type" : "field",
-                                    "value" : ["scalars", "metadata.value_sketch1"]
-                                  },
-                                  "right" : {
-                                    "type" : "field",
-                                    "value" : ["scalars", "metadata.value_sketch0"]
-                                  }
-                                }
-                              }
-                            }
-                          },
-                          "cond" : {
-                            "type" : "expression",
-                            "value" : {
-                              "op" : "<",
-                              "left" : {
-                                "type" : "field",
-                                "value" : ["scalars", "metadata.value_sketch2"]
-                              },
-                              "right" : {
-                                "type" : "expression",
-                                "value" : {
-                                  "op" : "?",
-                                  "left" : {
-                                    "type" : "field",
-                                    "value" : ["scalars", "metadata.value_sketch1"]
-                                  },
-                                  "right" : {
-                                    "type" : "field",
-                                    "value" : ["scalars", "metadata.value_sketch0"]
-                                  },
-                                  "cond" : {
-                                    "type" : "expression",
-                                    "value" : {
-                                      "op" : "<",
-                                      "left" : {
-                                        "type" : "field",
-                                        "value" : ["scalars", "metadata.value_sketch1"]
-                                      },
-                                      "right" : {
-                                        "type" : "field",
-                                        "value" : ["scalars", "metadata.value_sketch0"]
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      },
-                      "right" : {
-                        "type" : "hexstr",
-                        "value" : "0x0000000000000064"
-                      }
-                    }
-                  }
-                }
-              }
+              "type" : "hexstr",
+              "value" : "0x01"
             }
           ]
         }

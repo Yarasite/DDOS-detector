@@ -55,20 +55,20 @@ struct metadata {
     bit<32> index_sketch0;
     bit<32> index_sketch1;
     bit<32> index_sketch2;
-    bit<32> index_sketch3;
-    bit<32> index_sketch4;
-    bit<32> index_sketch5;
-    bit<32> index_sketch6;
-    bit<32> index_sketch7;
+    // bit<32> index_sketch3;
+    // bit<32> index_sketch4;
+    // bit<32> index_sketch5;
+    // bit<32> index_sketch6;
+    // bit<32> index_sketch7;
 
     bit<64> value_sketch0;
     bit<64> value_sketch1;
     bit<64> value_sketch2;
-    bit<64> value_sketch3;
-    bit<64> value_sketch4;
-    bit<64> value_sketch5;
-    bit<64> value_sketch6;
-    bit<64> value_sketch7;
+    // bit<64> value_sketch3;
+    // bit<64> value_sketch4;
+    // bit<64> value_sketch5;
+    // bit<64> value_sketch6;
+    // bit<64> value_sketch7;
 
     bit<1> exceed_threshold;  // for threshold check
     bit<32> current_free_idx;

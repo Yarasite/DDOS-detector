@@ -7,7 +7,7 @@
 #define SKETCH_BUCKET_LENGTH 28
 #define SKETCH_CELL_BIT_WIDTH 64
 #define ARRAY_SIZE 10
-#define THRESHOLD 100
+#define THRESHOLD 10
 
 // 每个寄存器有 28 个单元，每个单元的宽度为 64 位
 #define SKETCH_REGISTER(num) register<bit<SKETCH_CELL_BIT_WIDTH>>(SKETCH_BUCKET_LENGTH) sketch##num
@@ -63,7 +63,7 @@ control MyIngress(inout headers hdr,
         if (min_value > THRESHOLD) {
             meta.exceed_threshold = 1;
         } else {
-            meta.exceed_threshold = 0;
+            meta.exceed_threshold = 1;
         }
     }
 
