@@ -20,6 +20,7 @@
         ["tmp_12", 16, false],
         ["tmp_13", 8, false],
         ["tmp_14", 64, false],
+        ["tmp_15", 64, false],
         ["metadata.index_sketch0", 32, false],
         ["metadata.index_sketch1", 32, false],
         ["metadata.index_sketch2", 32, false],
@@ -324,15 +325,27 @@
         "column" : 23,
         "source_fragment" : "suspicious_ip_pair"
       },
-      "size" : 10,
+      "size" : 11,
       "bitwidth" : 64
     },
     {
-      "name" : "MyIngress.free_idx",
+      "name" : "MyIngress.suspicious_ip_port_protocol",
       "id" : 4,
       "source_info" : {
         "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
         "line" : 35,
+        "column" : 26,
+        "source_fragment" : "suspicious_ip_port_protocol"
+      },
+      "size" : 11,
+      "bitwidth" : 64
+    },
+    {
+      "name" : "MyIngress.free_idx",
+      "id" : 5,
+      "source_info" : {
+        "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
+        "line" : 36,
         "column" : 25,
         "source_fragment" : "free_idx"
       },
@@ -452,7 +465,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 38,
+            "line" : 39,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
           }
@@ -478,7 +491,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 43,
+            "line" : 44,
             "column" : 74,
             "source_fragment" : "hdr.ipv4.srcAddr"
           }
@@ -497,7 +510,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 43,
+            "line" : 44,
             "column" : 92,
             "source_fragment" : "hdr.ipv4.dstAddr"
           }
@@ -516,7 +529,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 43,
+            "line" : 44,
             "column" : 110,
             "source_fragment" : "hdr.tcp.srcPort"
           }
@@ -535,7 +548,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 43,
+            "line" : 44,
             "column" : 127,
             "source_fragment" : "hdr.tcp.dstPort"
           }
@@ -554,7 +567,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 43,
+            "line" : 44,
             "column" : 144,
             "source_fragment" : "hdr.ipv4.protocol"
           }
@@ -581,7 +594,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 43,
+            "line" : 44,
             "column" : 8,
             "source_fragment" : "hash(meta.index_sketch0, HashAlgorithm.crc32_custom, (bit<16>)0, {hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.ipv4.protocol}, (bit<32>)28)"
           }
@@ -604,7 +617,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 43,
+            "line" : 44,
             "column" : 178,
             "source_fragment" : "sketch0.read(meta.value_sketch0, meta.index_sketch0)"
           }
@@ -646,7 +659,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 43,
+            "line" : 44,
             "column" : 232,
             "source_fragment" : "meta.value_sketch0 = meta.value_sketch0 +1"
           }
@@ -669,7 +682,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 43,
+            "line" : 44,
             "column" : 276,
             "source_fragment" : "sketch0.write(meta.index_sketch0, meta.value_sketch0)"
           }
@@ -688,7 +701,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 44,
+            "line" : 45,
             "column" : 74,
             "source_fragment" : "hdr.ipv4.srcAddr"
           }
@@ -707,7 +720,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 44,
+            "line" : 45,
             "column" : 92,
             "source_fragment" : "hdr.ipv4.dstAddr"
           }
@@ -726,7 +739,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 44,
+            "line" : 45,
             "column" : 110,
             "source_fragment" : "hdr.tcp.srcPort"
           }
@@ -745,7 +758,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 44,
+            "line" : 45,
             "column" : 127,
             "source_fragment" : "hdr.tcp.dstPort"
           }
@@ -764,7 +777,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 44,
+            "line" : 45,
             "column" : 144,
             "source_fragment" : "hdr.ipv4.protocol"
           }
@@ -791,7 +804,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 44,
+            "line" : 45,
             "column" : 8,
             "source_fragment" : "hash(meta.index_sketch1, HashAlgorithm.crc32_custom, (bit<16>)0, {hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.ipv4.protocol}, (bit<32>)28)"
           }
@@ -814,7 +827,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 44,
+            "line" : 45,
             "column" : 178,
             "source_fragment" : "sketch1.read(meta.value_sketch1, meta.index_sketch1)"
           }
@@ -856,7 +869,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 44,
+            "line" : 45,
             "column" : 232,
             "source_fragment" : "meta.value_sketch1 = meta.value_sketch1 +1"
           }
@@ -879,7 +892,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 44,
+            "line" : 45,
             "column" : 276,
             "source_fragment" : "sketch1.write(meta.index_sketch1, meta.value_sketch1)"
           }
@@ -898,7 +911,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 45,
+            "line" : 46,
             "column" : 74,
             "source_fragment" : "hdr.ipv4.srcAddr"
           }
@@ -917,7 +930,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 45,
+            "line" : 46,
             "column" : 92,
             "source_fragment" : "hdr.ipv4.dstAddr"
           }
@@ -936,7 +949,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 45,
+            "line" : 46,
             "column" : 110,
             "source_fragment" : "hdr.tcp.srcPort"
           }
@@ -955,7 +968,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 45,
+            "line" : 46,
             "column" : 127,
             "source_fragment" : "hdr.tcp.dstPort"
           }
@@ -974,7 +987,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 45,
+            "line" : 46,
             "column" : 144,
             "source_fragment" : "hdr.ipv4.protocol"
           }
@@ -1001,7 +1014,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 45,
+            "line" : 46,
             "column" : 8,
             "source_fragment" : "hash(meta.index_sketch2, HashAlgorithm.crc32_custom, (bit<16>)0, {hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.ipv4.protocol}, (bit<32>)28)"
           }
@@ -1024,7 +1037,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 45,
+            "line" : 46,
             "column" : 178,
             "source_fragment" : "sketch2.read(meta.value_sketch2, meta.index_sketch2)"
           }
@@ -1066,7 +1079,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 45,
+            "line" : 46,
             "column" : 232,
             "source_fragment" : "meta.value_sketch2 = meta.value_sketch2 +1"
           }
@@ -1089,7 +1102,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 45,
+            "line" : 46,
             "column" : 276,
             "source_fragment" : "sketch2.write(meta.index_sketch2, meta.value_sketch2)"
           }
@@ -1109,8 +1122,107 @@
               "value" : ["scalars", "metadata.exceed_threshold"]
             },
             {
-              "type" : "hexstr",
-              "value" : "0x01"
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "?",
+                  "left" : {
+                    "type" : "hexstr",
+                    "value" : "0x01"
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x00"
+                  },
+                  "cond" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : ">",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "?",
+                          "left" : {
+                            "type" : "field",
+                            "value" : ["scalars", "metadata.value_sketch2"]
+                          },
+                          "right" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "?",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.value_sketch1"]
+                              },
+                              "right" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.value_sketch0"]
+                              },
+                              "cond" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "<",
+                                  "left" : {
+                                    "type" : "field",
+                                    "value" : ["scalars", "metadata.value_sketch1"]
+                                  },
+                                  "right" : {
+                                    "type" : "field",
+                                    "value" : ["scalars", "metadata.value_sketch0"]
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "cond" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "<",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.value_sketch2"]
+                              },
+                              "right" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "?",
+                                  "left" : {
+                                    "type" : "field",
+                                    "value" : ["scalars", "metadata.value_sketch1"]
+                                  },
+                                  "right" : {
+                                    "type" : "field",
+                                    "value" : ["scalars", "metadata.value_sketch0"]
+                                  },
+                                  "cond" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "<",
+                                      "left" : {
+                                        "type" : "field",
+                                        "value" : ["scalars", "metadata.value_sketch1"]
+                                      },
+                                      "right" : {
+                                        "type" : "field",
+                                        "value" : ["scalars", "metadata.value_sketch0"]
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x000000000000000a"
+                      }
+                    }
+                  }
+                }
+              }
             }
           ]
         }
@@ -1193,7 +1305,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 74,
+            "line" : 78,
             "column" : 56,
             "source_fragment" : "ip_pair"
           }
@@ -1216,9 +1328,144 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 74,
+            "line" : 78,
             "column" : 8,
             "source_fragment" : "suspicious_ip_pair.write(meta.current_free_idx, ip_pair)"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_15"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "|",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "|",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "<<",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "field",
+                                    "value" : ["tcp", "srcPort"]
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0xffffffffffffffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x18"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffffffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "<<",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "field",
+                                    "value" : ["tcp", "dstPort"]
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0xffffffffffffffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x8"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffffffffffff"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["ipv4", "protocol"]
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0xffffffffffffffff"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
+            "line" : 79,
+            "column" : 65,
+            "source_fragment" : "ip_port_protocol"
+          }
+        },
+        {
+          "op" : "register_write",
+          "parameters" : [
+            {
+              "type" : "register_array",
+              "value" : "MyIngress.suspicious_ip_port_protocol"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.current_free_idx"]
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_15"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
+            "line" : 79,
+            "column" : 8,
+            "source_fragment" : "suspicious_ip_port_protocol.write(meta.current_free_idx, ip_port_protocol)"
           }
         },
         {
@@ -1239,7 +1486,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 77,
+            "line" : 82,
             "column" : 8,
             "source_fragment" : "free_idx.write(0, next_idx)"
           }
@@ -1270,7 +1517,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 81,
+            "line" : 86,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = egress_port"
           }
@@ -1278,7 +1525,7 @@
       ]
     },
     {
-      "name" : "demo118",
+      "name" : "demo123",
       "id" : 7,
       "runtime_data" : [],
       "primitives" : [
@@ -1300,7 +1547,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 118,
+            "line" : 123,
             "column" : 12,
             "source_fragment" : "free_idx.read(meta.current_free_idx, 0)"
           }
@@ -1325,7 +1572,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 114,
+            "line" : 119,
             "column" : 12,
             "source_fragment" : "sketch_count()"
           },
@@ -1354,7 +1601,7 @@
           "id" : 1,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 115,
+            "line" : 120,
             "column" : 12,
             "source_fragment" : "check()"
           },
@@ -1367,9 +1614,9 @@
           "direct_meters" : null,
           "action_ids" : [4],
           "actions" : ["MyIngress.check"],
-          "base_default_next" : "tbl_demo118",
+          "base_default_next" : "tbl_demo123",
           "next_tables" : {
-            "MyIngress.check" : "tbl_demo118"
+            "MyIngress.check" : "tbl_demo123"
           },
           "default_entry" : {
             "action_id" : 4,
@@ -1379,11 +1626,11 @@
           }
         },
         {
-          "name" : "tbl_demo118",
+          "name" : "tbl_demo123",
           "id" : 2,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 118,
+            "line" : 123,
             "column" : 12,
             "source_fragment" : "free_idx.read(meta.current_free_idx, 0)"
           },
@@ -1395,10 +1642,10 @@
           "support_timeout" : false,
           "direct_meters" : null,
           "action_ids" : [7],
-          "actions" : ["demo118"],
+          "actions" : ["demo123"],
           "base_default_next" : "MyIngress.suspicious_ip_table",
           "next_tables" : {
-            "demo118" : "MyIngress.suspicious_ip_table"
+            "demo123" : "MyIngress.suspicious_ip_table"
           },
           "default_entry" : {
             "action_id" : 7,
@@ -1412,7 +1659,7 @@
           "id" : 3,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 97,
+            "line" : 102,
             "column" : 10,
             "source_fragment" : "suspicious_ip_table"
           },
@@ -1432,7 +1679,7 @@
           ],
           "match_type" : "exact",
           "type" : "simple",
-          "max_size" : 10,
+          "max_size" : 11,
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
@@ -1455,7 +1702,7 @@
           "id" : 4,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 84,
+            "line" : 89,
             "column" : 10,
             "source_fragment" : "forwarding"
           },
@@ -1496,7 +1743,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 113,
+            "line" : 118,
             "column" : 12,
             "source_fragment" : "hdr.ipv4.isValid() && hdr.tcp.isValid()"
           },
@@ -1538,7 +1785,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-        "line" : 127,
+        "line" : 132,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },

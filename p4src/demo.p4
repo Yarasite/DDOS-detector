@@ -6,7 +6,7 @@
 
 #define SKETCH_BUCKET_LENGTH 28
 #define SKETCH_CELL_BIT_WIDTH 64
-#define ARRAY_SIZE 10
+#define ARRAY_SIZE 11
 #define THRESHOLD 10
 
 // 每个寄存器有 28 个单元，每个单元的宽度为 64 位
@@ -32,6 +32,7 @@ control MyIngress(inout headers hdr,
 
     // 定义存储可疑 IP 对的数组
 	register<bit<64>>(ARRAY_SIZE) suspicious_ip_pair;
+    register<bit<64>>(ARRAY_SIZE) suspicious_ip_port_protocol;
     register<bit<32>>(1) free_idx;
     
     action drop() {
@@ -63,15 +64,19 @@ control MyIngress(inout headers hdr,
         if (min_value > THRESHOLD) {
             meta.exceed_threshold = 1;
         } else {
-            meta.exceed_threshold = 1;
+            meta.exceed_threshold = 0;
         }
     }
 
     action store_suspicious_ip(bit<32> next_idx) {
         bit<64> ip_pair = (bit<64>) hdr.ipv4.srcAddr << 32 | (bit<64>) hdr.ipv4.dstAddr;
+        bit<64> ip_port_protocol = ((bit<64>) hdr.tcp.srcPort << 24) |
+                                    ((bit<64>) hdr.tcp.dstPort << 8) |
+                                    ((bit<64>) hdr.ipv4.protocol);  
 
         // Read current index and store suspicious I
         suspicious_ip_pair.write(meta.current_free_idx, ip_pair);
+        suspicious_ip_port_protocol.write(meta.current_free_idx, ip_port_protocol);
 
         // Use lookup table for next index update
         free_idx.write(0, next_idx);

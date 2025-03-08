@@ -4,12 +4,33 @@ import pickle
 import os
 from p4utils.utils.helper import load_topo
 from p4utils.utils.sswitch_thrift_API import *
-from crc import Crc
+from utils import *
 
 
-ARRAY_SIZE = 10
+ARRAY_SIZE = 11
 crc32_polinomials = [0x04C11DB7, 0xEDB88320, 0xDB710641, 0x82608EDB, 0x741B8CD7, 0xEB31D82E,
                      0xD663B05, 0xBA0DC66B, 0x32583499, 0x992C1A4C, 0x32583499, 0x992C1A4C]
+
+
+class BlackTable():
+    def __init__(self) -> None:
+        self.table = Heap()
+
+    def insert(self, flow, cnt):
+        node = self.table.find_by_metadata(flow)
+        if node:
+            self.table.update_val(flow, cnt)
+        else:
+            self.table.insert(cnt, flow)
+
+    def tok_k(self, k):
+        max_k_nodes = self.table.get_max_k(k)
+        for node in max_k_nodes:
+            print(f"Val: {node.val}, Metadata: {node.metadata}")
+        return max_k_nodes
+
+    def size(self):
+        return self.table.total
 
 
 class CMSController(object):
@@ -25,11 +46,10 @@ class CMSController(object):
         self.custom_calcs = self.controller.get_custom_crc_calcs()
         self.register_num = len(self.custom_calcs)
 
-        if not debug:
-            self.init()
-        else:
-            self.debug()
+        self.init()
         self.registers = []
+        if debug:
+            self.debug()
 
     def init(self):
         if self.set_hash:
@@ -119,20 +139,27 @@ class CMSController(object):
 
     def read_suspicious_ips(self):
         """Read all stored suspicious IP pairs from the P4 register."""
-        register_name = "suspicious_ip_pair"
+        register1 = "suspicious_ip_pair"
+        register2 = "suspicious_ip_port_protocol"
 
         suspicious_ips = []
+
         for idx in range(ARRAY_SIZE):
-            ip_pair = self.controller.register_read(register_name, idx)
+            ip_pair = self.controller.register_read(register1, idx)
+            ip_port_protocol = self.controller.register_read(register2, idx)
             if ip_pair != 0:  # Ignore empty slots
                 src_ip = (ip_pair >> 32) & 0xFFFFFFFF
                 dst_ip = ip_pair & 0xFFFFFFFF
-                suspicious_ips.append((src_ip, dst_ip))
+                src_port = (ip_port_protocol >> 24) & 0xFFFF
+                dst_port = (ip_port_protocol >> 8) & 0xFFFF
+                protocol = ip_port_protocol & 0xFF
+                suspicious_ips.append(
+                    (src_ip, dst_ip, src_port, dst_port, protocol))
 
-        print("Suspicious IP pairs:")
-        for src, dst in suspicious_ips:
-            print(
-                f"Source: {self.format_ip(src)}, Destination: {self.format_ip(dst)}")
+        # print("Suspicious Flow Entries:")
+        # for src, dst, sport, dport, proto in suspicious_ips:
+        #     print(f"Source: {self.format_ip(src)}, Destination: {self.format_ip(dst)}, "
+        #           f"SrcPort: {sport}, DstPort: {dport}, Protocol: {proto}")
 
         return suspicious_ips
 
@@ -157,12 +184,38 @@ class CMSController(object):
 
         return entries
 
+    def load_suspicious_ips(self):
+        ips = self.read_suspicious_ips()
+        flow_set = set(ips)
+        # for src_ip, dst_ip, src_port, dst_port, proto in flow_set:
+        #     flow = (self.format_ip(src_ip), self.format_ip(
+        #         dst_ip), src_port, dst_port)
+        #     cnt = self.get_cms(flow, 28)
+        #     print(
+        #         f'src: {self.format_ip(src_ip)}, dst: {self.format_ip(dst_ip)}, cnt: {cnt}')
+        return flow_set
+
     def debug(self):
-        self.get_free_index()
-        self.read_suspicious_ips()
-        self.read_registers()
-        print(self.registers)
+        # self.get_free_index()
+        # self.read_suspicious_ips()
+        # self.read_registers()  # 读取到p4的寄存器计数后才能get_cms
+        # self.load_suspicious_ips()
+        # print(self.registers)
         # self.view_suspicious_ip_table()
+
+        bt = BlackTable()
+        while bt.size() < 3000:
+            self.read_registers()
+            flow_set = set(self.read_suspicious_ips())
+            for src_ip, dst_ip, src_port, dst_port, proto in flow_set:
+                flow = (self.format_ip(src_ip), self.format_ip(
+                    dst_ip), src_port, dst_port)
+                cnt = self.get_cms(flow, 28)
+                bt.insert(flow, cnt)
+        bt.tok_k(10)
+        flows = pickle.load(open("sent_flows.pickle", "rb"))
+        for flow, n_packets in flows.items():
+            print(f'{flow}: {n_packets}')
 
 
 if __name__ == "__main__":
@@ -176,7 +229,7 @@ if __name__ == "__main__":
     parser.add_argument('--n', help="number of packets sent by the send.py app",
                         type=int, required=False, default=1000)
     parser.add_argument('--mod', help="number of cells in each register",
-                        type=int, required=False, default=4096)
+                        type=int, required=False, default=28)
     parser.add_argument('--flow-file', help="name of the file generated by send.py",
                         type=str, required=False, default="sent_flows.pickle")
     parser.add_argument('--option', help="controller option can be either set_hashes, decode or reset registers",

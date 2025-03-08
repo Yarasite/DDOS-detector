@@ -1,5 +1,6 @@
 import struct
 
+
 class Crc(object):
     """
     A base class for CRC routines.
@@ -43,7 +44,6 @@ class Crc(object):
         else:
             self.crc_shift = 0
 
-
     def __get_nondirect_init(self, init):
         """
         return the non-direct init if the direct algorithm has been selected.
@@ -58,7 +58,6 @@ class Crc(object):
                 crc |= self.msb_mask
         return crc & self.mask
 
-
     def reflect(self, data, width):
         """
         reflect a data word, i.e. reverts the bit order.
@@ -70,7 +69,6 @@ class Crc(object):
             data >>= 1
             res = (res << 1) | (data & 0x01)
         return res
-
 
     def bit_by_bit(self, in_data):
         """
@@ -98,7 +96,6 @@ class Crc(object):
         if self.reflect_out:
             reg = self.reflect(reg, self.width)
         return (reg ^ self.xor_out) & self.mask
-
 
     def bit_by_bit_fast(self, in_data):
         """
