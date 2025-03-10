@@ -325,7 +325,7 @@
         "column" : 23,
         "source_fragment" : "suspicious_ip_pair"
       },
-      "size" : 11,
+      "size" : 23,
       "bitwidth" : 64
     },
     {
@@ -337,7 +337,7 @@
         "column" : 26,
         "source_fragment" : "suspicious_ip_port_protocol"
       },
-      "size" : 11,
+      "size" : 23,
       "bitwidth" : 64
     },
     {
@@ -451,8 +451,36 @@
       "primitives" : []
     },
     {
-      "name" : "MyIngress.drop",
+      "name" : "NoAction",
       "id" : 2,
+      "runtime_data" : [],
+      "primitives" : []
+    },
+    {
+      "name" : "MyIngress.drop",
+      "id" : 3,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "mark_to_drop",
+          "parameters" : [
+            {
+              "type" : "header",
+              "value" : "standard_metadata"
+            }
+          ],
+          "source_info" : {
+            "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
+            "line" : 39,
+            "column" : 8,
+            "source_fragment" : "mark_to_drop(standard_metadata)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "MyIngress.drop",
+      "id" : 4,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -474,7 +502,7 @@
     },
     {
       "name" : "MyIngress.sketch_count",
-      "id" : 3,
+      "id" : 5,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -1111,7 +1139,7 @@
     },
     {
       "name" : "MyIngress.check",
-      "id" : 4,
+      "id" : 6,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -1230,7 +1258,7 @@
     },
     {
       "name" : "MyIngress.store_suspicious_ip",
-      "id" : 5,
+      "id" : 7,
       "runtime_data" : [
         {
           "name" : "next_idx",
@@ -1495,7 +1523,7 @@
     },
     {
       "name" : "MyIngress.set_egress_port",
-      "id" : 6,
+      "id" : 8,
       "runtime_data" : [
         {
           "name" : "egress_port",
@@ -1525,8 +1553,8 @@
       ]
     },
     {
-      "name" : "demo123",
-      "id" : 7,
+      "name" : "demo139",
+      "id" : 9,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -1547,7 +1575,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 123,
+            "line" : 139,
             "column" : 12,
             "source_fragment" : "free_idx.read(meta.current_free_idx, 0)"
           }
@@ -1565,14 +1593,75 @@
         "column" : 8,
         "source_fragment" : "MyIngress"
       },
-      "init_table" : "node_2",
+      "init_table" : "MyIngress.discard_table",
       "tables" : [
         {
-          "name" : "tbl_sketch_count",
+          "name" : "MyIngress.discard_table",
           "id" : 0,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 119,
+            "line" : 102,
+            "column" : 10,
+            "source_fragment" : "discard_table"
+          },
+          "key" : [
+            {
+              "match_type" : "exact",
+              "name" : "hdr.ipv4.srcAddr",
+              "target" : ["ipv4", "srcAddr"],
+              "mask" : null
+            },
+            {
+              "match_type" : "exact",
+              "name" : "hdr.ipv4.dstAddr",
+              "target" : ["ipv4", "dstAddr"],
+              "mask" : null
+            },
+            {
+              "match_type" : "exact",
+              "name" : "hdr.tcp.srcPort",
+              "target" : ["tcp", "srcPort"],
+              "mask" : null
+            },
+            {
+              "match_type" : "exact",
+              "name" : "hdr.tcp.dstPort",
+              "target" : ["tcp", "dstPort"],
+              "mask" : null
+            },
+            {
+              "match_type" : "exact",
+              "name" : "hdr.ipv4.protocol",
+              "target" : ["ipv4", "protocol"],
+              "mask" : null
+            }
+          ],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [4, 1],
+          "actions" : ["MyIngress.drop", "NoAction"],
+          "base_default_next" : "node_3",
+          "next_tables" : {
+            "MyIngress.drop" : "node_3",
+            "NoAction" : "node_3"
+          },
+          "default_entry" : {
+            "action_id" : 1,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        },
+        {
+          "name" : "tbl_sketch_count",
+          "id" : 1,
+          "source_info" : {
+            "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
+            "line" : 135,
             "column" : 12,
             "source_fragment" : "sketch_count()"
           },
@@ -1583,14 +1672,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [3],
+          "action_ids" : [5],
           "actions" : ["MyIngress.sketch_count"],
           "base_default_next" : "tbl_check",
           "next_tables" : {
             "MyIngress.sketch_count" : "tbl_check"
           },
           "default_entry" : {
-            "action_id" : 3,
+            "action_id" : 5,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -1598,10 +1687,10 @@
         },
         {
           "name" : "tbl_check",
-          "id" : 1,
+          "id" : 2,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 120,
+            "line" : 136,
             "column" : 12,
             "source_fragment" : "check()"
           },
@@ -1612,25 +1701,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [4],
+          "action_ids" : [6],
           "actions" : ["MyIngress.check"],
-          "base_default_next" : "tbl_demo123",
+          "base_default_next" : "tbl_demo139",
           "next_tables" : {
-            "MyIngress.check" : "tbl_demo123"
+            "MyIngress.check" : "tbl_demo139"
           },
           "default_entry" : {
-            "action_id" : 4,
+            "action_id" : 6,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_demo123",
-          "id" : 2,
+          "name" : "tbl_demo139",
+          "id" : 3,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 123,
+            "line" : 139,
             "column" : 12,
             "source_fragment" : "free_idx.read(meta.current_free_idx, 0)"
           },
@@ -1641,14 +1730,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [7],
-          "actions" : ["demo123"],
+          "action_ids" : [9],
+          "actions" : ["demo139"],
           "base_default_next" : "MyIngress.suspicious_ip_table",
           "next_tables" : {
-            "demo123" : "MyIngress.suspicious_ip_table"
+            "demo139" : "MyIngress.suspicious_ip_table"
           },
           "default_entry" : {
-            "action_id" : 7,
+            "action_id" : 9,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -1656,10 +1745,10 @@
         },
         {
           "name" : "MyIngress.suspicious_ip_table",
-          "id" : 3,
+          "id" : 4,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 102,
+            "line" : 118,
             "column" : 10,
             "source_fragment" : "suspicious_ip_table"
           },
@@ -1679,11 +1768,11 @@
           ],
           "match_type" : "exact",
           "type" : "simple",
-          "max_size" : 11,
+          "max_size" : 23,
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [5, 1],
+          "action_ids" : [7, 2],
           "actions" : ["MyIngress.store_suspicious_ip", "NoAction"],
           "base_default_next" : "MyIngress.forwarding",
           "next_tables" : {
@@ -1691,7 +1780,7 @@
             "NoAction" : "MyIngress.forwarding"
           },
           "default_entry" : {
-            "action_id" : 1,
+            "action_id" : 2,
             "action_const" : false,
             "action_data" : [],
             "action_entry_const" : false
@@ -1699,7 +1788,7 @@
         },
         {
           "name" : "MyIngress.forwarding",
-          "id" : 4,
+          "id" : 5,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
             "line" : 89,
@@ -1720,7 +1809,7 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [6, 2, 0],
+          "action_ids" : [8, 3, 0],
           "actions" : ["MyIngress.set_egress_port", "MyIngress.drop", "NoAction"],
           "base_default_next" : null,
           "next_tables" : {
@@ -1729,7 +1818,7 @@
             "NoAction" : null
           },
           "default_entry" : {
-            "action_id" : 2,
+            "action_id" : 3,
             "action_const" : false,
             "action_data" : [],
             "action_entry_const" : false
@@ -1739,11 +1828,11 @@
       "action_profiles" : [],
       "conditionals" : [
         {
-          "name" : "node_2",
+          "name" : "node_3",
           "id" : 0,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 118,
+            "line" : 134,
             "column" : 12,
             "source_fragment" : "hdr.ipv4.isValid() && hdr.tcp.isValid()"
           },
@@ -1785,7 +1874,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-        "line" : 132,
+        "line" : 148,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },

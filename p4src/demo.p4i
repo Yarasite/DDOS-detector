@@ -1043,8 +1043,8 @@ control MyIngress(inout headers hdr,
     register<bit<64>>(28) sketch2;
 
     // 定义存储可疑 IP 对的数组
- register<bit<64>>(11) suspicious_ip_pair;
-    register<bit<64>>(11) suspicious_ip_port_protocol;
+ register<bit<64>>(23) suspicious_ip_pair;
+    register<bit<64>>(23) suspicious_ip_port_protocol;
     register<bit<32>>(1) free_idx;
 
     action drop() {
@@ -1111,6 +1111,22 @@ control MyIngress(inout headers hdr,
         default_action = drop;
     }
 
+    table discard_table {
+        key = {
+            hdr.ipv4.srcAddr: exact;
+            hdr.ipv4.dstAddr: exact;
+            hdr.tcp.srcPort: exact;
+            hdr.tcp.dstPort: exact;
+            hdr.ipv4.protocol: exact;
+        }
+        actions = {
+            drop;
+            NoAction;
+        }
+        size = 1024;
+        default_action = NoAction();
+    }
+
     table suspicious_ip_table {
         key = {
             meta.exceed_threshold: exact; // Only apply when threshold exceeded
@@ -1120,12 +1136,12 @@ control MyIngress(inout headers hdr,
             store_suspicious_ip;
             NoAction;
         }
-        size = 11;
+        size = 23;
         default_action = NoAction;
     }
 
     apply {
-
+        discard_table.apply();
         //apply sketch
         if (hdr.ipv4.isValid() && hdr.tcp.isValid()){
             sketch_count();

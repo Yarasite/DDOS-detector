@@ -6,7 +6,7 @@
 
 #define SKETCH_BUCKET_LENGTH 28
 #define SKETCH_CELL_BIT_WIDTH 64
-#define ARRAY_SIZE 11
+#define ARRAY_SIZE 23
 #define THRESHOLD 10
 
 // 每个寄存器有 28 个单元，每个单元的宽度为 64 位
@@ -99,6 +99,22 @@ control MyIngress(inout headers hdr,
         default_action = drop;
     }
 
+    table discard_table {
+        key = {
+            hdr.ipv4.srcAddr: exact;
+            hdr.ipv4.dstAddr: exact;
+            hdr.tcp.srcPort:  exact;
+            hdr.tcp.dstPort:  exact;
+            hdr.ipv4.protocol: exact;
+        }
+        actions = {
+            drop;
+            NoAction;
+        }
+        size = 1024;
+        default_action = NoAction();
+    }
+
     table suspicious_ip_table {
         key = {
             meta.exceed_threshold: exact;  // Only apply when threshold exceeded
@@ -113,7 +129,7 @@ control MyIngress(inout headers hdr,
     }
 
     apply {
-
+        discard_table.apply();
         //apply sketch
         if (hdr.ipv4.isValid() && hdr.tcp.isValid()){
             sketch_count();

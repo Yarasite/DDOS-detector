@@ -1,3 +1,6 @@
+import multiprocessing
+import builtins
+
 class Crc(object):
     """
     A base class for CRC routines.
@@ -229,37 +232,97 @@ class Heap:
         return True
 
 
+def output_with_manager(func):
+    def wrapper(*args, **kwargs):
+        output_manager = OutputManager()
+        original_print = builtins.print  # 使用 builtins.print
+        
+        def custom_print(*messages):
+            output_manager.send_message(" ".join(map(str, messages)))
+        
+        try:
+            builtins.print = custom_print  # 修改内置的打印函数
+            return func(*args, **kwargs)
+        finally:
+            builtins.print = original_print
+    return wrapper
+
+class OutputManager:
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(OutputManager, cls).__new__(cls)
+            cls._instance._init_output_process()
+        return cls._instance
+
+    def _init_output_process(self):
+        # 创建一个队列，用于在主进程和输出进程之间传递信息
+        self.message_queue = multiprocessing.Queue()
+        # 创建并启动输出进程
+        self.output_process = multiprocessing.Process(target=self._output_worker, args=(self.message_queue,))
+        self.output_process.start()
+
+    def _output_worker(self, queue):
+        # 使用局部变量保存上一次的消息，用于过滤重复消息
+        last_message = None
+        while True:
+            message = queue.get()
+            if message is None:
+                break
+            if message != last_message:
+                print(message)
+                last_message = message
+
+    def send_message(self, message):
+        self.message_queue.put(message)
+
+    def stop(self):
+        self.message_queue.put(None)
+        self.output_process.join()
+        print("Output process terminated.")
+
+
+
+@output_with_manager
+def test():
+    print("test")
+    print("test")
+
+
 if __name__ == "__main__":
+    test()
     # 测试代码
-    heap = Heap()
-    heap.insert(3, "meta3")
-    heap.insert(5, "meta5")
-    heap.insert(1, "meta1")
-    heap.insert(7, "meta7")
-    print("Total:", heap.total)
-    max_k_nodes = heap.get_max_k(2)
-    for node in max_k_nodes:
-        print(f"Val: {node.val}, Metadata: {node.metadata}")
-    deleted_node = heap.delete()
-    if deleted_node:
-        print(
-            f"Deleted Val: {deleted_node.val}, Metadata: {deleted_node.metadata}")
-    print("Total after deletion:", heap.total)
+    # heap = Heap()
+    # heap.insert(3, "meta3")
+    # heap.insert(5, "meta5")
+    # heap.insert(1, "meta1")
+    # heap.insert(7, "meta7")
+    # print("Total:", heap.total)
+    # max_k_nodes = heap.get_max_k(2)
+    # for node in max_k_nodes:
+    #     print(f"Val: {node.val}, Metadata: {node.metadata}")
+    # deleted_node = heap.delete()
+    # if deleted_node:
+    #     print(
+    #         f"Deleted Val: {deleted_node.val}, Metadata: {deleted_node.metadata}")
+    # print("Total after deletion:", heap.total)
 
-    # 测试查找功能
-    found_node = heap.find_by_metadata("meta5")
-    if found_node:
-        print(f"Found Val: {found_node.val}, Metadata: {found_node.metadata}")
-    else:
-        print("Node not found.")
+    # # 测试查找功能
+    # found_node = heap.find_by_metadata("meta5")
+    # if found_node:
+    #     print(f"Found Val: {found_node.val}, Metadata: {found_node.metadata}")
+    # else:
+    #     print("Node not found.")
 
-    # 测试更新功能
-    if heap.update_val("meta5", 8):
-        print("Updated successfully.")
-        updated_node = heap.find_by_metadata("meta5")
-        if updated_node:
-            print(
-                f"Updated Val: {updated_node.val}, Metadata: {updated_node.metadata}")
-            print("New Total:", heap.total)
-    else:
-        print("Update failed.")
+    # # 测试更新功能
+    # if heap.update_val("meta5", 8):
+    #     print("Updated successfully.")
+    #     updated_node = heap.find_by_metadata("meta5")
+    #     if updated_node:
+    #         print(
+    #             f"Updated Val: {updated_node.val}, Metadata: {updated_node.metadata}")
+    #         print("New Total:", heap.total)
+    # else:
+    #     print("Update failed.")
+    

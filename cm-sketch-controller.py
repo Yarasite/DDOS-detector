@@ -5,9 +5,11 @@ import os
 from p4utils.utils.helper import load_topo
 from p4utils.utils.sswitch_thrift_API import *
 from utils import *
+from time import sleep
 
 
-ARRAY_SIZE = 11
+ARRAY_SIZE = 23
+THRESHOLD = 30 // 再小拦不住
 crc32_polinomials = [0x04C11DB7, 0xEDB88320, 0xDB710641, 0x82608EDB, 0x741B8CD7, 0xEB31D82E,
                      0xD663B05, 0xBA0DC66B, 0x32583499, 0x992C1A4C, 0x32583499, 0x992C1A4C]
 
@@ -23,6 +25,7 @@ class BlackTable():
         else:
             self.table.insert(cnt, flow)
 
+    @output_with_manager
     def tok_k(self, k):
         max_k_nodes = self.table.get_max_k(k)
         for node in max_k_nodes:
@@ -48,6 +51,7 @@ class CMSController(object):
 
         self.init()
         self.registers = []
+        self.black_table = BlackTable()
         if debug:
             self.debug()
 
@@ -195,6 +199,34 @@ class CMSController(object):
         #         f'src: {self.format_ip(src_ip)}, dst: {self.format_ip(dst_ip)}, cnt: {cnt}')
         return flow_set
 
+    @output_with_manager
+    def update_discard_table(self):
+        print("update_discard_table")
+        top_flows = self.black_table.tok_k(10)  # Retrieve top 10 flows
+        for node in top_flows:
+            if node.val > THRESHOLD:
+                flow_key = node.metadata  # Assuming this contains tuple (srcIP, dstIP, srcPort, dstPort, protocol)
+                self.controller.table_add('discard_table', 'drop',
+                                          [str(flow_key[0]), str(flow_key[1]),
+                                           str(flow_key[2]), str(flow_key[3]),
+                                           str(flow_key[4])], [])
+                print(f"Flow {flow_key} added to discard table due to high count {node.val}")
+            else:
+                break
+
+    def remove_from_discard_table(self):
+        entries = self.controller.table_dump('discard_table')
+        if entries != None:
+            for entry in entries:
+                flow_key = (entry['key'][0], entry['key'][1], entry['key'][2], entry['key'][3], entry['key'][4])
+                node = self.black_table.find_by_metadata(flow_key)
+                if not node or node.val <= THRESHOLD:
+                    self.controller.table_delete('discard_table',
+                                                [str(flow_key[0]), str(flow_key[1]),
+                                                str(flow_key[2]), str(flow_key[3]),
+                                                str(flow_key[4])])
+                    print(f"Flow {flow_key} removed from discard table")
+
     def debug(self):
         # self.get_free_index()
         # self.read_suspicious_ips()
@@ -203,19 +235,25 @@ class CMSController(object):
         # print(self.registers)
         # self.view_suspicious_ip_table()
 
-        bt = BlackTable()
-        while bt.size() < 3000:
+        # TODO 下发流表
+        while self.black_table.size() < 30:
             self.read_registers()
             flow_set = set(self.read_suspicious_ips())
             for src_ip, dst_ip, src_port, dst_port, proto in flow_set:
                 flow = (self.format_ip(src_ip), self.format_ip(
-                    dst_ip), src_port, dst_port)
+                    dst_ip), src_port, dst_port, proto)
                 cnt = self.get_cms(flow, 28)
-                bt.insert(flow, cnt)
-        bt.tok_k(10)
+                self.black_table.insert(flow, cnt)
+                # print(f"size: {self.black_table.size()}")
+            self.update_discard_table()
+            # self.remove_from_discard_table()
+            
         flows = pickle.load(open("sent_flows.pickle", "rb"))
         for flow, n_packets in flows.items():
-            print(f'{flow}: {n_packets}')
+            if n_packets > 10:
+                print(f'{flow}: {n_packets}')
+                cms = self.get_cms(flow, 28) # TODO cms有很多个0,p4程序可能有问题
+                print("Packets sent and read by the cms: {}/{}".format(n_packets, cms))
 
 
 if __name__ == "__main__":
