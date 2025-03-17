@@ -72,6 +72,7 @@ struct metadata {
 
     bit<1> exceed_threshold;  // for threshold check
     bit<32> current_free_idx;
+    bit<32> next_free_idx;
 }
 
 struct headers {

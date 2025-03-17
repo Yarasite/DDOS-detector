@@ -21,6 +21,7 @@
         ["tmp_13", 8, false],
         ["tmp_14", 64, false],
         ["tmp_15", 64, false],
+        ["tmp_16", 32, false],
         ["metadata.index_sketch0", 32, false],
         ["metadata.index_sketch1", 32, false],
         ["metadata.index_sketch2", 32, false],
@@ -29,6 +30,7 @@
         ["metadata.value_sketch2", 64, false],
         ["metadata.exceed_threshold", 1, false],
         ["metadata.current_free_idx", 32, false],
+        ["metadata.next_free_idx", 32, false],
         ["_padding_0", 7, false]
       ]
     },
@@ -1150,107 +1152,8 @@
               "value" : ["scalars", "metadata.exceed_threshold"]
             },
             {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "?",
-                  "left" : {
-                    "type" : "hexstr",
-                    "value" : "0x01"
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0x00"
-                  },
-                  "cond" : {
-                    "type" : "expression",
-                    "value" : {
-                      "op" : ">",
-                      "left" : {
-                        "type" : "expression",
-                        "value" : {
-                          "op" : "?",
-                          "left" : {
-                            "type" : "field",
-                            "value" : ["scalars", "metadata.value_sketch2"]
-                          },
-                          "right" : {
-                            "type" : "expression",
-                            "value" : {
-                              "op" : "?",
-                              "left" : {
-                                "type" : "field",
-                                "value" : ["scalars", "metadata.value_sketch1"]
-                              },
-                              "right" : {
-                                "type" : "field",
-                                "value" : ["scalars", "metadata.value_sketch0"]
-                              },
-                              "cond" : {
-                                "type" : "expression",
-                                "value" : {
-                                  "op" : "<",
-                                  "left" : {
-                                    "type" : "field",
-                                    "value" : ["scalars", "metadata.value_sketch1"]
-                                  },
-                                  "right" : {
-                                    "type" : "field",
-                                    "value" : ["scalars", "metadata.value_sketch0"]
-                                  }
-                                }
-                              }
-                            }
-                          },
-                          "cond" : {
-                            "type" : "expression",
-                            "value" : {
-                              "op" : "<",
-                              "left" : {
-                                "type" : "field",
-                                "value" : ["scalars", "metadata.value_sketch2"]
-                              },
-                              "right" : {
-                                "type" : "expression",
-                                "value" : {
-                                  "op" : "?",
-                                  "left" : {
-                                    "type" : "field",
-                                    "value" : ["scalars", "metadata.value_sketch1"]
-                                  },
-                                  "right" : {
-                                    "type" : "field",
-                                    "value" : ["scalars", "metadata.value_sketch0"]
-                                  },
-                                  "cond" : {
-                                    "type" : "expression",
-                                    "value" : {
-                                      "op" : "<",
-                                      "left" : {
-                                        "type" : "field",
-                                        "value" : ["scalars", "metadata.value_sketch1"]
-                                      },
-                                      "right" : {
-                                        "type" : "field",
-                                        "value" : ["scalars", "metadata.value_sketch0"]
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      },
-                      "right" : {
-                        "type" : "hexstr",
-                        "value" : "0x000000000000000a"
-                      }
-                    }
-                  }
-                }
-              }
+              "type" : "hexstr",
+              "value" : "0x01"
             }
           ]
         }
@@ -1259,12 +1162,7 @@
     {
       "name" : "MyIngress.store_suspicious_ip",
       "id" : 7,
-      "runtime_data" : [
-        {
-          "name" : "next_idx",
-          "bitwidth" : 32
-        }
-      ],
+      "runtime_data" : [],
       "primitives" : [
         {
           "op" : "assign",
@@ -1497,6 +1395,172 @@
           }
         },
         {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.next_free_idx"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "?",
+                  "left" : {
+                    "type" : "hexstr",
+                    "value" : "0x00000000"
+                  },
+                  "right" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "+",
+                          "left" : {
+                            "type" : "field",
+                            "value" : ["scalars", "metadata.current_free_idx"]
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x00000001"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0xffffffff"
+                      }
+                    }
+                  },
+                  "cond" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : ">=",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "+",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.current_free_idx"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x00000001"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x00000017"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_16"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "?",
+                  "left" : {
+                    "type" : "hexstr",
+                    "value" : "0x00000000"
+                  },
+                  "right" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "+",
+                          "left" : {
+                            "type" : "field",
+                            "value" : ["scalars", "metadata.current_free_idx"]
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x00000001"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0xffffffff"
+                      }
+                    }
+                  },
+                  "cond" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : ">=",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "+",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.current_free_idx"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x00000001"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x00000017"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
+            "line" : 87,
+            "column" : 26,
+            "source_fragment" : "meta.next_free_idx"
+          }
+        },
+        {
           "op" : "register_write",
           "parameters" : [
             {
@@ -1508,15 +1572,15 @@
               "value" : "0x00000000"
             },
             {
-              "type" : "runtime_data",
-              "value" : 0
+              "type" : "field",
+              "value" : ["scalars", "tmp_16"]
             }
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 82,
+            "line" : 87,
             "column" : 8,
-            "source_fragment" : "free_idx.write(0, next_idx)"
+            "source_fragment" : "free_idx.write(0, meta.next_free_idx)"
           }
         }
       ]
@@ -1545,7 +1609,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 86,
+            "line" : 91,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = egress_port"
           }
@@ -1553,7 +1617,7 @@
       ]
     },
     {
-      "name" : "demo139",
+      "name" : "demo143",
       "id" : 9,
       "runtime_data" : [],
       "primitives" : [
@@ -1575,7 +1639,7 @@
           ],
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 139,
+            "line" : 143,
             "column" : 12,
             "source_fragment" : "free_idx.read(meta.current_free_idx, 0)"
           }
@@ -1600,7 +1664,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 102,
+            "line" : 107,
             "column" : 10,
             "source_fragment" : "discard_table"
           },
@@ -1661,7 +1725,7 @@
           "id" : 1,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 135,
+            "line" : 139,
             "column" : 12,
             "source_fragment" : "sketch_count()"
           },
@@ -1690,7 +1754,7 @@
           "id" : 2,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 136,
+            "line" : 140,
             "column" : 12,
             "source_fragment" : "check()"
           },
@@ -1703,9 +1767,9 @@
           "direct_meters" : null,
           "action_ids" : [6],
           "actions" : ["MyIngress.check"],
-          "base_default_next" : "tbl_demo139",
+          "base_default_next" : "tbl_demo143",
           "next_tables" : {
-            "MyIngress.check" : "tbl_demo139"
+            "MyIngress.check" : "tbl_demo143"
           },
           "default_entry" : {
             "action_id" : 6,
@@ -1715,11 +1779,11 @@
           }
         },
         {
-          "name" : "tbl_demo139",
+          "name" : "tbl_demo143",
           "id" : 3,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 139,
+            "line" : 143,
             "column" : 12,
             "source_fragment" : "free_idx.read(meta.current_free_idx, 0)"
           },
@@ -1731,10 +1795,10 @@
           "support_timeout" : false,
           "direct_meters" : null,
           "action_ids" : [9],
-          "actions" : ["demo139"],
+          "actions" : ["demo143"],
           "base_default_next" : "MyIngress.suspicious_ip_table",
           "next_tables" : {
-            "demo139" : "MyIngress.suspicious_ip_table"
+            "demo143" : "MyIngress.suspicious_ip_table"
           },
           "default_entry" : {
             "action_id" : 9,
@@ -1748,7 +1812,7 @@
           "id" : 4,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 118,
+            "line" : 123,
             "column" : 10,
             "source_fragment" : "suspicious_ip_table"
           },
@@ -1757,12 +1821,6 @@
               "match_type" : "exact",
               "name" : "meta.exceed_threshold",
               "target" : ["scalars", "metadata.exceed_threshold"],
-              "mask" : null
-            },
-            {
-              "match_type" : "exact",
-              "name" : "meta.current_free_idx",
-              "target" : ["scalars", "metadata.current_free_idx"],
               "mask" : null
             }
           ],
@@ -1791,7 +1849,7 @@
           "id" : 5,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 89,
+            "line" : 94,
             "column" : 10,
             "source_fragment" : "forwarding"
           },
@@ -1832,7 +1890,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-            "line" : 134,
+            "line" : 138,
             "column" : 12,
             "source_fragment" : "hdr.ipv4.isValid() && hdr.tcp.isValid()"
           },
@@ -1874,7 +1932,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "/home/nesk/P4/DDOS-detector/p4src/demo.p4",
-        "line" : 148,
+        "line" : 152,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },

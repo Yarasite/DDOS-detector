@@ -64,11 +64,11 @@ control MyIngress(inout headers hdr,
         if (min_value > THRESHOLD) {
             meta.exceed_threshold = 1;
         } else {
-            meta.exceed_threshold = 0;
+            meta.exceed_threshold = 1;
         }
     }
 
-    action store_suspicious_ip(bit<32> next_idx) {
+    action store_suspicious_ip() {
         bit<64> ip_pair = (bit<64>) hdr.ipv4.srcAddr << 32 | (bit<64>) hdr.ipv4.dstAddr;
         bit<64> ip_port_protocol = ((bit<64>) hdr.tcp.srcPort << 24) |
                                     ((bit<64>) hdr.tcp.dstPort << 8) |
@@ -79,7 +79,12 @@ control MyIngress(inout headers hdr,
         suspicious_ip_port_protocol.write(meta.current_free_idx, ip_port_protocol);
 
         // Use lookup table for next index update
-        free_idx.write(0, next_idx);
+        if(meta.current_free_idx + 1 >= ARRAY_SIZE) {
+            meta.next_free_idx = 0;
+        } else {
+            meta.next_free_idx = meta.current_free_idx + 1;
+        }
+        free_idx.write(0, meta.next_free_idx);
     }
 
     action set_egress_port(bit<9> egress_port){
@@ -118,7 +123,6 @@ control MyIngress(inout headers hdr,
     table suspicious_ip_table {
         key = {
             meta.exceed_threshold: exact;  // Only apply when threshold exceeded
-            meta.current_free_idx: exact;  // Lookup next index for register update
         }
         actions = {
             store_suspicious_ip;
