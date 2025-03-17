@@ -1,4 +1,4 @@
 table_add forwarding set_egress_port 1 => 2
 table_add forwarding set_egress_port 2 => 1
 
-
+table_add suspicious_ip_table store_suspicious_ip 1 =>

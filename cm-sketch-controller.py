@@ -64,17 +64,19 @@ class CMSController(object):
     def init_table(self):
         self.init_free_idx()
 
-        table_name = "suspicious_ip_table"
-        action_name = "store_suspicious_ip"
+        # table_name = "suspicious_ip_table"
+        # action_name = "store_suspicious_ip"
 
-        # for i in range(ARRAY_SIZE):  # Assuming ARRAY_SIZE = 10
-        #     next_index = (i + 1) % ARRAY_SIZE
-        self.controller.table_add(table_name, action_name, [
-            "1"], [])
+        # self.controller.table_add(table_name, action_name, [
+        #     "1"], [])
 
     def init_free_idx(self):
         """Initialize the free_idx register to 0"""
         register_name = "free_idx"
+        # if self.sw_name == "s1":
+        #     self.controller.register_write(
+        #         register_name, 0, 1)  # Set free_idx[0] = 0
+        # else:
         self.controller.register_write(
             register_name, 0, 0)  # Set free_idx[0] = 0
         print(f"Initialized {register_name} to 0")
@@ -232,6 +234,7 @@ class CMSController(object):
                     print(f"Flow {flow_key} removed from discard table")
 
     def debug(self):
+        print(f'switch: {self.sw_name}', end=' ')
         self.get_free_index()
         # self.read_suspicious_ips()
         # self.read_registers()  # 读取到p4的寄存器计数后才能get_cms
@@ -280,10 +283,13 @@ if __name__ == "__main__":
 
     set_hashes = args.option == "set_hashes"
     debug = args.option == "debug"
-    controller = CMSController(args.sw, set_hashes, debug)
+    con1 = CMSController(args.sw, set_hashes, debug)
+    con2 = CMSController("s2", set_hashes, debug)
 
     if args.option == "decode":
-        controller.decode_registers(args.eps, args.n, args.mod, args.flow_file)
+        con1.decode_registers(args.eps, args.n, args.mod, args.flow_file)
+        con2.decode_registers(args.eps, args.n, args.mod, args.flow_file)
 
     elif args.option == "reset":
-        controller.reset_registers()
+        con1.reset_registers()
+        con2.reset_registers()
